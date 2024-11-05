@@ -94,10 +94,25 @@ class Value:
 
         return out
     
-    def backward(): #general backward for the wall network
+    def backward(self): #general backward for the wall network
 
         topo = []
-        
+        visited = set()
+
+        def build_topo(v):
+            if v not in visited:
+                for child in v._prev:
+                    build_topo(child)
+                visited.add(v)
+            topo.append(v)
+
+        build_topo(self)
+
+        self.grad = 1.0
+        for node in reversed(topo):
+            node._backward()
+
+
 
     
 
