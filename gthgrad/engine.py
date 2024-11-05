@@ -66,12 +66,12 @@ class Value:
     def __neg__(self):
         return self * -1
     
-    def __sub__(self,other):
+    def __sub__(self,other): # to manage - op
         return self + (-other)
 
     def tanh(self):
         x = self.data
-        t = ((math.exp(2*x)-1)/(math.exp(2*x)+1))
+        t = ((math.exp(2*x)-1)/(math.exp(2*x)+1)) #we can use the base formula, both work well
         out = Value(t, (self,), 'tanh')
 
         def _backward():
@@ -79,6 +79,36 @@ class Value:
         out._backward = _backward
 
         return out
+    
+    def exp(self):
+        x = self.data
+        t = math.exp(x)
+        out = Value(t, (self,), 'exp')
+
+        def _backward():
+            self.grad += out.data * out.grad
+        out._backward = _backward
+
+        return out
+    
+    def backward(self): #general backward for the wall network
+
+        topo = []
+        visited = set()
+
+        def build_topo(v):
+            if v not in visited:
+                for child in v._prev:
+                    build_topo(child)
+                visited.add(v)
+            topo.append(v)
+        
+        build_topo(self)
+
+        self.grad = 1.0
+
+        for node in reversed(topo):
+            node._backward()
 
     
 
