@@ -95,6 +95,7 @@ class Value:
         return out
     
     def backward(self): #general backward for the wall network
+        # we use the topological sort to implement the wall backward of our network
 
         topo = []
         visited = set()
@@ -105,10 +106,8 @@ class Value:
                     build_topo(child)
                 visited.add(v)
             topo.append(v)
-
+        
         build_topo(self)
-
-        self.grad = 1.0
         for node in reversed(topo):
             node._backward()
 
