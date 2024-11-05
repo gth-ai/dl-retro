@@ -14,7 +14,7 @@ class Value:
         self.label = label
 
         self.grad = 0.0
-        self._backward = lambda:None
+        self._backward = lambda:None # depends on the operation, we have differents strategies of backward
         self._prev = set(_children)
 
     def __repr__(self):
