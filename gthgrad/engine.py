@@ -21,12 +21,12 @@ class Value:
         return f"Value=(data={self.data})"
     
     def __add__(self, other):
-        other = other if isinstance(other, Value) else Value(other)
-        out = Value(self.data + other.data, (self,other), '+')
+        other = other if isinstance(other,Value) else Value(other)
+        out = Value(self.data + other.data, _children=(self,other), _op = '+')
 
         def _backward():
+            self.grad += 1.0 + out.grad # grad of a + b = 1, because we considere b as constant
             other.grad += 1.0 + out.grad
-            self.grad += 1.0 + out.grad
         out._backward = _backward
 
         return out 
@@ -34,45 +34,49 @@ class Value:
     # the following fonction is to reinsure that addition op is commutative
     def __radd__(self,other):
         return self + other
+        
     
     def __mul__(self, other):
-        other = other if isinstance(other,Value) else Value(other)
-        out = Value(self.data * other.data, (self, other), '*')
-
-        def _backward(): # real implementation of _backward = lambda:None
-            self.grad += out.grad * other.data
-            other.grad += self.data * out.grad
-        out._backward = _backward
-
-        return out 
-    
-    # the following fonction is to reinsure that multiplication op is commutative
-    def __rmul__(self,other):
-        return self * other
-    
-    def __truediv__(self,other):
-        return self * other**-1
-    
-    def __power__(self, other):
-        assert isinstance(other, (int,float)), "Support int or float only"
-        out = Value(self.data**other, (self,), f'**{other}')
+        other = other if isinstance(other, Value) else Value(other)
+        out = Value(self.data * other.data, _children=(self,other), _op='*')
 
         def _backward():
-            self.grad += other * (self.data ** (other -1)) * out.grad
+            self.grad += other.data + out.grad # grad from a * b considering b (other) as constant
+            other.grad += self.data + out.grad
+        out._backward = _backward
+
+        return out
+        
+    
+    # the following fonction is to reinsure that multiplication op is commutative
+    def __rmul__(self, other):
+        return self * other
+        
+    
+    def __truediv__(self,other):
+        return self * other**(-1)
+        
+    
+    def __pow__(self, other):
+        assert isinstance(other, (int,float)),"Only supporting int or float"
+        out = Value(self.data ** other, _children=(self,), _op=f'**{other}')
+
+        def _backward():
+            self.grad += other * (self.data ** (other-1)) * out.grad
         out._backward = _backward
 
         return out
     
     def __neg__(self):
-        return self * -1
+        return self * (-1)
     
-    def __sub__(self,other): # to manage - op
-        return self + (-other)
+    def __sub__(self,other): # soustraction
+        return self + (-other) 
 
     def tanh(self):
         x = self.data
-        t = ((math.exp(2*x)-1)/(math.exp(2*x)+1)) #we can use the base formula, both work well
-        out = Value(t, (self,), 'tanh')
+        t = ((math.exp(x)**2) - 1)/((math.exp(x)**2) + 1) # or (math.exp(2*x)-1)/(math.exp(2*x)+1)
+        out = Value(t, _children=(self,), _op='tanh')
 
         def _backward():
             self.grad += (1 - t**2) * out.grad
@@ -81,34 +85,19 @@ class Value:
         return out
     
     def exp(self):
-        x = self.data
-        t = math.exp(x)
-        out = Value(t, (self,), 'exp')
-
+        t = math.exp(self.data)
+        out = Value(t, _children=(self,), _op='exp')
+        
         def _backward():
-            self.grad += out.data * out.grad
+            self.grad += t * out.grad # or out.grad * out.data 
         out._backward = _backward
 
         return out
     
-    def backward(self): #general backward for the wall network
+    def backward(): #general backward for the wall network
 
         topo = []
-        visited = set()
-
-        def build_topo(v):
-            if v not in visited:
-                for child in v._prev:
-                    build_topo(child)
-                visited.add(v)
-            topo.append(v)
         
-        build_topo(self)
-
-        self.grad = 1.0
-
-        for node in reversed(topo):
-            node._backward()
 
     
 
