@@ -25,8 +25,8 @@ class Value:
         out = Value(self.data + other.data, _children=(self,other), _op = '+')
 
         def _backward():
-            self.grad += 1.0 + out.grad # grad of a + b = 1, because we considere b as constant
-            other.grad += 1.0 + out.grad
+            self.grad += 1.0 * out.grad # grad of a + b = 1, because we considere b as constant
+            other.grad += 1.0 * out.grad
         out._backward = _backward
 
         return out 
@@ -41,8 +41,8 @@ class Value:
         out = Value(self.data * other.data, _children=(self,other), _op='*')
 
         def _backward():
-            self.grad += other.data + out.grad # grad from a * b considering b (other) as constant
-            other.grad += self.data + out.grad
+            self.grad += other.data * out.grad # grad from a * b considering b (other) as constant
+            other.grad += self.data * out.grad
         out._backward = _backward
 
         return out
