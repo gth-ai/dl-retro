@@ -57,15 +57,34 @@ class Value:
         return self * other**(-1)
         
     
-    def __pow__(self, other):
-        assert isinstance(other, (int,float)),"Only supporting int or float"
-        out = Value(self.data ** other, _children=(self,), _op=f'**{other}')
+    def __pow__(self,other):
+        if isinstance(other,Value):
+            if self.data < 0:
+                raise ValueError("Negative bases are not supported when exponent is a Value")
+            out = Value(self.data ** other.data, _children=(self,other), op=f'**{other}')
 
-        def _backward():
-            self.grad += other * (self.data ** (other-1)) * out.grad
-        out._backward = _backward
+            def _backward():
+                self.grad += other.data*(self.data**(other.data-1)) * out.grad
+                other.grad += (math.log(self.data)*out.data) * out.grad
 
-        return out
+            out._backward = _backward
+
+            return out
+
+        elif isinstance(other, (int,float)):
+            if self.data < 0 and not isinstance(other,int):
+                raise ValueError("Negative bases with non-integer exponents are not supported")
+            if self.data.data == 0 and other <= 0:
+                raise ValueError("0 cannot be raised to a non-positive power")
+            
+            out = Value(self.data**other, _children=(self,), _op=f"**{other}")
+
+            def _backward():
+                self.grad += other*(self.data**(other-1)) * out.grad
+
+            out._backward = _backward
+
+            return out
     
     def __neg__(self):
         return self * (-1)
