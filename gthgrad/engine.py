@@ -185,5 +185,7 @@ class Value:
                 topo.append(v)
         
         build_topo(self)  # Start building from the current node.
+        self.grad = 1.0 # Initialize gradient
+
         for node in reversed(topo):
             node._backward()  # Apply the backward function.
