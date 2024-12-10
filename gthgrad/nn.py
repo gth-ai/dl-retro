@@ -32,7 +32,7 @@ class Neuron:
         """
         # Compute the weighted sum of inputs plus the bias.
         act = sum((wi * xi for wi, xi in zip(self.w, x)), self.b)
-        out = act.tanh()  # Apply the tanh activation function.
+        out = act.tanh()  # Apply the tanh acntivation function.
 
         return out
 
