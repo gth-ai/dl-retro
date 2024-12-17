@@ -153,6 +153,21 @@ class Value:
 
         return out
     
+    def relu(self):
+        """
+        Applies the Rectified Linear Unit (ReLU) activation function.
+
+        Returns:
+            Value: The result after applying ReLU.
+        """
+        out = Value(self.data if self.data > 0 else 0.0, (self,), 'ReLU')
+
+        def _backward():
+            self.grad += (1.0 if self.data > 0 else 0.0) * out.grad
+        out._backward = _backward
+
+        return out
+    
     def exp(self):
         """
         Computes the exponential function.
