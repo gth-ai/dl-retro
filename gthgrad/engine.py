@@ -182,7 +182,7 @@ class Value:
                 for child in v._prev:
                     build_topo(child)
                 visited.add(v)
-                topo.append(v)
+            topo.append(v)
         
         build_topo(self)  # Start building from the current node.
         self.grad = 1.0 # Initialize gradient
