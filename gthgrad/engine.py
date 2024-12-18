@@ -256,3 +256,22 @@ class Value:
 
         for node in reversed(topo):
             node._backward()  # Apply the backward function.
+
+    def zero_grad(self):
+        """
+        Resets the gradients of all nodes in the computational graph to zero.
+        """
+        topo = []
+        visited = set()
+
+        def build_topo(v):
+            if v not in visited:
+                visited.add(v)
+                for child in v._prev:
+                    build_topo(child)
+                topo.append(v)
+
+        build_topo(self)
+
+        for node in topo:
+            node.grad = 0.0
