@@ -201,6 +201,23 @@ class Value:
         out._backward = _backward
 
         return out
+    
+    def log(self):
+        """
+        Applies the natural logarithm function.
+
+        Returns:
+            Value: The result after applying log.
+        """
+        if self.data <= 0:
+            raise ValueError("Logarithm undefined for non-positive values")
+        out = Value(math.log(self.data), (self,), 'log')
+
+        def _backward():
+            self.grad += (1 / self.data) * out.grad
+        out._backward = _backward
+
+        return out
 
     
     def exp(self):
