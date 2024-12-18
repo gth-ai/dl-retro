@@ -168,6 +168,24 @@ class Value:
 
         return out
     
+    def leaky_relu(self, alpha=0.01):
+        """
+        Applies the Leaky ReLU activation function.
+
+        Args:
+            alpha (float, optional): Slope for negative inputs.
+
+        Returns:
+            Value: The result after applying Leaky ReLU.
+        """
+        out = Value(self.data if self.data > 0 else alpha * self.data, (self,), 'LeakyReLU')
+
+        def _backward():
+            self.grad += (1.0 if self.data > 0 else alpha) * out.grad
+        out._backward = _backward
+
+        return out
+    
     def sigmoid(self):
         """
         Applies the sigmoid activation function.
