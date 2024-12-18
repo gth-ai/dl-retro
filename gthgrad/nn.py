@@ -28,7 +28,7 @@ class Neuron:
             Value or list of Value: Activated output.
         """
         act =  sum((wi*xi for wi,xi in zip(self.w,x)),self.b)
-        
+
         if self.activation == 'tanh':
             out = act.tanh()
         elif self.activation == 'relu':
@@ -58,7 +58,7 @@ class Layer:
     A layer consists of multiple neurons, each processing the same inputs in parallel.
     """
 
-    def __init__(self, nin, nout):
+    def __init__(self, nin, nout,activation='tanh'):
         """
         Initializes a Layer with the specified number of inputs and outputs.
 
@@ -67,7 +67,7 @@ class Layer:
         - nout (int): Number of neurons in the layer (outputs of the layer).
         """
         # Create a list of neurons for the layer.
-        self.neurons = [Neuron(nin) for _ in range(nout)]
+        self.neurons = [Neuron(nin,activation) for _ in range(nout)]
 
     def __call__(self, x):
         """
