@@ -99,48 +99,45 @@ class Layer:
             params.extend(ps)
 
         return params
-
-
+    
 class MLP:
     """
-    Represents a Multi-Layer Perceptron (MLP).
-
-    An MLP is composed of multiple layers, each processing inputs sequentially.
+    Multi-Layer Perceptron model consisting of multiple layers.
     """
-
-    def __init__(self, nin, nouts):
+    def __init__(self, nin, nouts, activation='tanh'):
         """
-        Initializes an MLP with the specified architecture.
+        Initializes an MLP.
 
-        Parameters:
-        - nin (int): Number of inputs to the MLP.
-        - nouts (list of int): List specifying the number of neurons in each layer.
+        Args:
+            nin (int): Number of input features.
+            nouts (list of int): List specifying the number of neurons in each layer.
+            activation (str, optional): Activation function for hidden layers.
         """
-        # Create a sequence of layers based on the architecture.
-        sz = [nin] + nouts
-        self.layers = [Layer(sz[i], sz[i + 1]) for i in range(len(nouts))]
+        self.layers = []
+        layers_sizes = [nin] + nouts
+        for i in range(len(nouts)):
+            activation_func = activation if i < len(nouts) - 1 else 'no_activation'
+            self.layers.append(Layer(layers_sizes[i], layers_sizes[i+1], activation_func))
 
     def __call__(self, x):
         """
-        Computes the output of the MLP for a given input.
+        Computes the MLP's output for a given input.
 
-        Parameters:
-        - x (list of Value): Input values to the MLP.
+        Args:
+            x (list of Value): Input values.
 
         Returns:
-        - Value or list of Value: Output of the MLP.
+            Value or list of Value: Outputs from the final layer.
         """
-        # Sequentially pass input through each layer.
         for layer in self.layers:
             x = layer(x)
         return x
 
     def parameters(self):
         """
-        Returns all learnable parameters of the MLP (weights and biases of all layers).
+        Returns the parameters of the MLP.
 
         Returns:
-        - list of Value: List of all parameters in the MLP.
+            list of Value: All parameters from all layers.
         """
-        # Collect parameters from all layers.
         return [p for layer in self.layers for p in layer.parameters()]
