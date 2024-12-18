@@ -3,45 +3,50 @@ from engine import Value
 
 class Neuron:
     """
-    Represents a single artificial neuron.
-
-    Each neuron has a set of weights and a bias, and it applies a weighted sum followed
-    by a non-linear activation function (tanh) to its inputs.
+    Represents a single neuron in a neural network.
     """
-
-    def __init__(self, nin):
+    def __init__(self, nin, activation='tanh'):
         """
-        Initializes a Neuron with a given number of inputs.
+        Initializes a Neuron.
 
-        Parameters:
-        - nin (int): Number of inputs to the neuron.
+        Args:
+            nin (int): Number of input connections.
+            activation (str, optional): Activation function ('tanh', 'relu', 'sigmoid', 'leaky_relu').
         """
-        # Initialize weights and bias with random values.
         self.w = [Value(random.uniform(-1, 1)) for _ in range(nin)]
         self.b = Value(random.uniform(-1, 1))
+        self.activation = activation
 
     def __call__(self, x):
         """
-        Computes the output of the neuron for a given input.
+        Computes the neuron's output for a given input.
 
-        Parameters:
-        - x (list of Value): Input values to the neuron.
+        Args:
+            x (list of Value): Input values.
 
         Returns:
-        - Value: The output of the neuron after applying the tanh activation function.
+            Value or list of Value: Activated output.
         """
-        # Compute the weighted sum of inputs plus the bias.
-        act = sum((wi * xi for wi, xi in zip(self.w, x)), self.b)
-        out = act.tanh()  # Apply the tanh acntivation function.
-
+        act =  sum((wi*xi for wi,xi in zip(self.w,x)),self.b)
+        
+        if self.activation == 'tanh':
+            out = act.tanh()
+        elif self.activation == 'relu':
+            out = act.relu()
+        elif self.activation == 'sigmoid':
+            out = act.sigmoid()
+        elif self.activation == 'leaky_relu':
+            out = act.leaky_relu()
+        else:
+            out = act  # No activation
         return out
 
     def parameters(self):
         """
-        Returns all learnable parameters of the neuron (weights and bias).
+        Returns the parameters of the neuron.
 
         Returns:
-        - list of Value: List of all parameters.
+            list of Value: Weights and bias.
         """
         return self.w + [self.b]
 
