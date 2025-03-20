@@ -34,3 +34,7 @@ class SGD:
         """
         for p in self.parameters:
             p.grad = 0.0
+
+class Adam:
+    def __init__(self):
+        pass
